@@ -6,12 +6,17 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    private static final String DRIVER_CLASS = "org.h2.Driver";
-
     // Use environment variables for database configuration
     private static final String DB_URL = getDbUrl();
     private static final String DB_USER = getDbUser();
     private static final String DB_PASSWORD = getDbPassword();
+
+    private static String getDriverClass() {
+        if (DB_URL != null && DB_URL.contains("postgresql")) {
+            return "org.postgresql.Driver";
+        }
+        return "org.h2.Driver";
+    }
 
     /**
      * Get database URL from environment variable or use default
@@ -19,6 +24,14 @@ public class DBConnection {
     private static String getDbUrl() {
         String dbUrl = System.getenv("FOODDB_URL");
         if (dbUrl != null && !dbUrl.isEmpty()) {
+            // Render and some PaaS provide postgres:// or postgresql:// instead of jdbc:postgresql://
+            if (dbUrl.startsWith("postgres://")) {
+                return "jdbc:postgresql://" + dbUrl.substring(11);
+            } else if (dbUrl.startsWith("postgresql://")) {
+                return "jdbc:postgresql://" + dbUrl.substring(13);
+            } else if (!dbUrl.startsWith("jdbc:")) {
+                return "jdbc:" + dbUrl;
+            }
             return dbUrl;
         }
         // Default: localhost development (H2 in memory)
@@ -33,6 +46,12 @@ public class DBConnection {
         if (user != null && !user.isEmpty()) {
             return user;
         }
+        
+        // If URL contains credentials (e.g., jdbc:postgresql://user:pass@host...), no default user
+        if (DB_URL != null && DB_URL.contains("@") && !DB_URL.contains("h2:mem")) {
+            return null;
+        }
+        
         return "sa";
     }
 
@@ -47,11 +66,16 @@ public class DBConnection {
             return password;
         }
         
+        // If URL contains credentials, no need to guess a password
+        if (DB_URL != null && DB_URL.contains("@") && !DB_URL.contains("h2:mem")) {
+            return null;
+        }
+        
         // Try common default passwords
         String[] commonPasswords = {"", "postgres", "password", "root"};
         for (String pwd : commonPasswords) {
             try {
-                Class.forName(DRIVER_CLASS);
+                Class.forName(getDriverClass());
                 Connection conn = DriverManager.getConnection(DB_URL, DB_USER, pwd);
                 conn.close();
                 // Success! Return this password
@@ -61,27 +85,23 @@ public class DBConnection {
             }
         }
         
-        // If none work, log helpful message and return empty
-        System.err.println("\n⚠️ DATABASE CONNECTION WARNING ⚠️");
-        System.err.println("Could not connect to the database with default passwords.");
-        System.err.println("\nTo fix this:");
-        System.err.println("1. Set the FOODDB_PASSWORD environment variable:");
-        System.err.println("   export FOODDB_PASSWORD='your_database_password'");
-        System.err.println("2. Then restart Tomcat");
-        System.err.println("\nCommon passwords tried: '', 'postgres', 'password', 'root'");
-        System.err.println("If you don't know your database password, reset it or contact your DBA.\n");
-        
         return "";
     }
 
     public static Connection getConnection() {
         try {
-            Class.forName(DRIVER_CLASS);
+            Class.forName(getDriverClass());
+            
+            // If the URL already contains the credentials (like Render), we can just connect directly
+            if (DB_USER == null && DB_PASSWORD == null) {
+                 return DriverManager.getConnection(DB_URL);
+            }
+            
             return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException("MySQL Driver not found! Ensure mysql-connector-java is in classpath.", e);
+            throw new RuntimeException("Database Driver not found! Expected: " + getDriverClass(), e);
         } catch (SQLException e) {
-            throw new RuntimeException("Database connection failed! Check credentials and database server.", e);
+            throw new RuntimeException("Database connection failed! URL: " + DB_URL, e);
         }
     }
 
