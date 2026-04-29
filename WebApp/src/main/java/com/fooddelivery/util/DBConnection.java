@@ -70,10 +70,62 @@ public class DBConnection {
         if (DB_PASSWORD == null) DB_PASSWORD = "";
     }
 
+    private static boolean initialized = false;
+
+    private static synchronized void initializeDatabase(Connection conn) {
+        if (initialized) return;
+        try {
+            java.sql.Statement stmt = conn.createStatement();
+            
+            // Create users table
+            stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
+                    "username VARCHAR(50) PRIMARY KEY, " +
+                    "password VARCHAR(100) NOT NULL, " +
+                    "email VARCHAR(100), " +
+                    "fullname VARCHAR(100), " +
+                    "createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                    "lastlogin TIMESTAMP)");
+                    
+            // Create orders table
+            stmt.execute("CREATE TABLE IF NOT EXISTS orders (" +
+                    "orderid VARCHAR(50) PRIMARY KEY, " +
+                    "customername VARCHAR(100) NOT NULL, " +
+                    "restaurant VARCHAR(100) NOT NULL, " +
+                    "amount DOUBLE PRECISION NOT NULL, " +
+                    "status VARCHAR(50) NOT NULL, " +
+                    "createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+                    "updatedat TIMESTAMP DEFAULT CURRENT_TIMESTAMP)");
+                    
+            // Create default admin user if not exists
+            java.sql.ResultSet rs = stmt.executeQuery("SELECT count(*) FROM users WHERE username='admin'");
+            rs.next();
+            if (rs.getInt(1) == 0) {
+                stmt.execute("INSERT INTO users (username, password, email, fullname) " +
+                             "VALUES ('admin', 'admin123', 'admin@fooddelivery.com', 'Administrator')");
+            }
+            rs.close();
+            stmt.close();
+            
+            initialized = true;
+        } catch (Exception e) {
+            System.err.println("Failed to auto-initialize database tables: " + e.getMessage());
+        }
+    }
+
     public static Connection getConnection() {
         try {
             Class.forName(DRIVER_CLASS);
-            return DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            Connection conn;
+            if (DB_USER == null && DB_PASSWORD == null) {
+                 conn = DriverManager.getConnection(DB_URL);
+            } else {
+                 conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+            }
+            
+            // Auto-create tables if they don't exist (especially for Render PostgreSQL)
+            initializeDatabase(conn);
+            
+            return conn;
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Database Driver not found! Expected: " + DRIVER_CLASS, e);
         } catch (SQLException e) {
