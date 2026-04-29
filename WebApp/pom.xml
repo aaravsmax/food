@@ -45,6 +45,13 @@
             <version>42.6.0</version>
         </dependency>
 
+        <!-- H2 Database for local testing -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.2.224</version>
+        </dependency>
+
         <!-- JUnit for Testing -->
         <dependency>
             <groupId>junit</groupId>

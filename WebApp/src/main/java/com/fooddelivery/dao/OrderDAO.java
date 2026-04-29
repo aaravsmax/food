@@ -19,7 +19,7 @@ public class OrderDAO {
         Connection connection = null;
         try {
             connection = DBConnection.getConnection();
-            String sql = "INSERT INTO orders (orderId, customerName, restaurant, amount, status) VALUES (?, ?, ?, ?, ?)";
+            String sql = "INSERT INTO orders (orderid, customername, restaurant, amount, status) VALUES (?, ?, ?, ?, ?)";
             PreparedStatement ps = connection.prepareStatement(sql);
 
             ps.setString(1, order.getOrderId());
@@ -56,8 +56,8 @@ public class OrderDAO {
 
             while (rs.next()) {
                 FoodOrder order = new FoodOrder(
-                        rs.getString("orderId"),
-                        rs.getString("customerName"),
+                        rs.getString("orderid"),
+                        rs.getString("customername"),
                         rs.getString("restaurant"),
                         rs.getDouble("amount"),
                         rs.getString("status")
@@ -92,8 +92,8 @@ public class OrderDAO {
 
             while (rs.next()) {
                 FoodOrder order = new FoodOrder(
-                        rs.getString("orderId"),
-                        rs.getString("customerName"),
+                        rs.getString("orderid"),
+                        rs.getString("customername"),
                         rs.getString("restaurant"),
                         rs.getDouble("amount"),
                         rs.getString("status")
@@ -179,7 +179,7 @@ public class OrderDAO {
 
         try {
             connection = DBConnection.getConnection();
-            String sql = "UPDATE orders SET status = ? WHERE orderId = ?";
+            String sql = "UPDATE orders SET status = ? WHERE orderid = ?";
             PreparedStatement ps = connection.prepareStatement(sql);
 
             ps.setString(1, newStatus);
@@ -206,7 +206,7 @@ public class OrderDAO {
 
         try {
             connection = DBConnection.getConnection();
-            String sql = "DELETE FROM orders WHERE orderId = ?";
+            String sql = "DELETE FROM orders WHERE orderid = ?";
             PreparedStatement ps = connection.prepareStatement(sql);
 
             ps.setString(1, orderId);
@@ -232,7 +232,7 @@ public class OrderDAO {
 
         try {
             connection = DBConnection.getConnection();
-            String sql = "SELECT * FROM orders WHERE orderId = ?";
+            String sql = "SELECT * FROM orders WHERE orderid = ?";
             PreparedStatement ps = connection.prepareStatement(sql);
 
             ps.setString(1, orderId);
@@ -240,8 +240,8 @@ public class OrderDAO {
 
             if (rs.next()) {
                 FoodOrder order = new FoodOrder(
-                        rs.getString("orderId"),
-                        rs.getString("customerName"),
+                        rs.getString("orderid"),
+                        rs.getString("customername"),
                         rs.getString("restaurant"),
                         rs.getDouble("amount"),
                         rs.getString("status")
@@ -258,5 +258,41 @@ public class OrderDAO {
         }
 
         return null;
+    }
+
+    /**
+     * Get all orders sorted by price (descending)
+     */
+    public static List<FoodOrder> getOrdersSortedByPrice() {
+        List<FoodOrder> orders = new ArrayList<>();
+        Connection connection = null;
+
+        try {
+            connection = DBConnection.getConnection();
+            String sql = "SELECT * FROM orders ORDER BY amount DESC";
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            while (rs.next()) {
+                FoodOrder order = new FoodOrder(
+                        rs.getString("orderid"),
+                        rs.getString("customername"),
+                        rs.getString("restaurant"),
+                        rs.getDouble("amount"),
+                        rs.getString("status")
+                );
+                orders.add(order);
+            }
+
+            rs.close();
+            stmt.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            DBConnection.closeConnection(connection);
+        }
+
+        return orders;
     }
 }

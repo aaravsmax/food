@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    private static final String DRIVER_CLASS = "org.postgresql.Driver";
+    private static final String DRIVER_CLASS = "org.h2.Driver";
 
     // Use environment variables for database configuration
     private static final String DB_URL = getDbUrl();
@@ -21,8 +21,8 @@ public class DBConnection {
         if (dbUrl != null && !dbUrl.isEmpty()) {
             return dbUrl;
         }
-        // Default: localhost development (PostgreSQL)
-        return "jdbc:postgresql://localhost:5432/fooddb?sslmode=disable";
+        // Default: localhost development (H2 in memory)
+        return "jdbc:h2:mem:fooddb;MODE=PostgreSQL;INIT=RUNSCRIPT FROM 'classpath:fooddb_h2.sql'";
     }
 
     /**
@@ -33,7 +33,7 @@ public class DBConnection {
         if (user != null && !user.isEmpty()) {
             return user;
         }
-        return "root";
+        return "sa";
     }
 
     /**

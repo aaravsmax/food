@@ -33,6 +33,7 @@
             <a href="index.jsp">➕ Add Order</a>
             <a href="viewOrders">📋 View All Orders</a>
             <a href="premiumOrders">💎 Premium Orders</a>
+            <a href="sortOrders">📉 Sort by Price</a>
             <a href="dashboard">📊 Dashboard</a>
             <span style="color: white; margin: 0 1rem;">👤 <%= username %></span>
             <a href="logout" style="background-color: #e74c3c; padding: 0.5rem 1rem; border-radius: 5px;">🚪 Logout</a>

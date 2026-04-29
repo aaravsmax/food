@@ -29,6 +29,7 @@
             <a href="index.jsp">➕ Add Order</a>
             <a href="viewOrders">📋 View All Orders</a>
             <a href="premiumOrders">💎 Premium Orders</a>
+            <a href="sortOrders">📉 Sort by Price</a>
             <a href="dashboard">📊 Dashboard</a>
             <span style="color: white; margin: 0 1rem;">👤 <%= username %></span>
             <a href="logout" style="background-color: #e74c3c; padding: 0.5rem 1rem; border-radius: 5px;">🚪 Logout</a>
@@ -112,6 +113,7 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                 <a href="viewOrders" class="btn btn-primary">📋 View All Orders</a>
                 <a href="premiumOrders" class="btn btn-premium">💎 Premium Orders (>₹1000)</a>
+                <a href="sortOrders" class="btn btn-info" style="background-color: #3498db; color: white;">📉 Sort by Price</a>
                 <a href="dashboard" class="btn btn-success">📊 View Dashboard</a>
             </div>
         </div>

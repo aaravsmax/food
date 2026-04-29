@@ -1,12 +1,13 @@
 com/fooddelivery/util/TestDB.class
 com/fooddelivery/servlet/DashboardServlet.class
 com/fooddelivery/servlet/LoginServlet.class
-com/fooddelivery/util/DBConnection.class
 com/fooddelivery/servlet/AddOrderServlet.class
 com/fooddelivery/servlet/PremiumOrdersServlet.class
-com/fooddelivery/servlet/LogoutServlet.class
 com/fooddelivery/servlet/DeleteOrderServlet.class
-com/fooddelivery/servlet/SessionCheckFilter.class
 com/fooddelivery/dao/OrderDAO.class
-com/fooddelivery/servlet/ViewOrdersServlet.class
 com/fooddelivery/model/FoodOrder.class
+com/fooddelivery/servlet/SortOrdersServlet.class
+com/fooddelivery/util/DBConnection.class
+com/fooddelivery/servlet/LogoutServlet.class
+com/fooddelivery/servlet/SessionCheckFilter.class
+com/fooddelivery/servlet/ViewOrdersServlet.class
